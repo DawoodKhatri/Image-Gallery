@@ -1,5 +1,6 @@
 .images-controls {
   margin: 20px;
+  margin-bottom: 0;
   display: flex;
   justify-content: end;
   align-items: center;
@@ -10,10 +11,10 @@
 }
 
 .images-container {
-  margin: 40px 20px;
+  flex-grow: 1;
+  margin:  20px;
   width: calc(100% - 40px);
   display: flex;
-  align-items: center;
   flex-wrap: wrap;
 }
 

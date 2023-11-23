@@ -1,0 +1,100 @@
+.main-container {
+  flex-grow: 1;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  gap: 30px;
+  background-image: radial-gradient(var(--color-primary-bg), white);
+}
+
+.main-container h1 {
+  margin: 0;
+  color: #181b1b;
+  font-size: 38px;
+}
+
+.main-container h1 span {
+  color: transparent;
+  background-clip: text;
+  -webkit-background-clip: text;
+  background-image: linear-gradient(
+    135deg,
+    var(--color-primary-light),
+    var(--color-primary)
+  );
+}
+
+.main-container p {
+  margin: 0;
+  max-width: 75%;
+  font-size: 18px;
+  line-height: 24px;
+}
+
+.button-container {
+  position: relative;
+}
+
+#signin-button,
+#login-button {
+  position: absolute;
+  top: 0;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+#signin-button {
+  transform: translateY(3px) scaleY(1.2);
+}
+
+#login-button {
+  transform: translateX(10px);
+}
+
+.nav-controls button {
+  pointer-events: none;
+  z-index: 1;
+  position: relative;
+}
+
+.main-container button {
+  pointer-events: none;
+  z-index: 1;
+  position: relative;
+  font-size: 16px;
+  padding: 12px 24px;
+  background-image: linear-gradient(
+    135deg,
+    var(--color-primary-light),
+    var(--color-primary)
+  );
+  transition: all 500ms ease-in-out;
+}
+
+.button-container:nth-child(1):hover > button {
+  background-color: var(--color-primary-light);
+}
+
+.button-container:nth-child(3):hover > button {
+  background-color: black;
+  transform: scale(1.02);
+  box-shadow: 0 0 24px var(--color-primary-light);
+}
+
+@media (min-width: 640px) {
+  .main-container h1 {
+    font-size: 72px;
+  }
+
+  .main-container p {
+    font-size: 20px;
+    line-height: 28px;
+  }
+
+  .main-container button {
+    font-size: 18px;
+  }
+}

@@ -8,11 +8,51 @@
       content="1088162041091-gka8thv8of6q703evrgvbv6vjul2ld7j.apps.googleusercontent.com"
     />
     <script src="https://accounts.google.com/gsi/client" async></script>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"
+    />
+    <link rel="stylesheet" href="/styles/global.css" />
+    <link rel="stylesheet" href="/styles/home.css" />
     <title>Image gallery</title>
   </head>
   <body>
-    <div id="signin-button"></div>
-    <button id="signout-button" onclick="handleSignOut()">Signout</button>
+    <nav class="nav">
+      <div class="nav-branding">Image Gallery</div>
+      <div class="nav-controls">
+        <div class="button-container">
+          <div id="login-button"></div>
+          <button>Login</button>
+        </div>
+      </div>
+    </nav>
+    <div class="main-container">
+      <h1>Effortless Image<br /><span>Editing & Storage</span></h1>
+      <p>
+        Transform, Crop, and Save in <b>Seconds</b> with a Click<br />Your
+        Images, Your Way
+      </p>
+      <div class="button-container">
+        <div id="signin-button"></div>
+        <button>Try now for free</button>
+      </div>
+    </div>
+    <footer class="footer">
+      <div>
+        <a href="https://www.linkedin.com/in/DawoodKhatri" target="_blank">
+          <button><i class="fa fa-linkedin"></i></button>
+        </a>
+        <a href="https://www.github.com/DawoodKhatri" target="_blank">
+          <button><i class="fa fa-github"></i></button>
+        </a>
+      </div>
+      <p>
+        Designed and Developed by
+        <a href="https://dawoodkhatri.vercel.app" target="_blank">
+          @DawoodKhatri.
+        </a>
+      </p>
+    </footer>
     <script>
       window.onload = async function () {
         console.log(google);
@@ -22,10 +62,31 @@
           callback: handleCredentialResponse,
         });
         google.accounts.id.prompt();
+
+        let { clientWidth: btnWidth, clientHeight: btnHeight } =
+          document.querySelector(".main-container div button");
+
         google.accounts.id.renderButton(
           document.getElementById("signin-button"),
-          { text: "signin" }
+          { size: "large" }
         );
+
+        document.getElementById("signin-button").style.width = btnWidth + "px";
+        document.getElementById("signin-button").style.height =
+          btnHeight + "px";
+
+        let { clientWidth: navBtnWidth, clientHeight: navBtnHeight } =
+          document.querySelector(".nav-controls button");
+
+        google.accounts.id.renderButton(
+          document.getElementById("login-button"),
+          { size: "large" }
+        );
+
+        document.getElementById("login-button").style.width =
+          navBtnWidth + "px";
+        document.getElementById("login-button").style.height =
+          navBtnHeight + "px";
       };
 
       const handleCredentialResponse = ({ credential }) => {
@@ -39,8 +100,6 @@
           window.location.href = "/images";
         });
       };
-
-      
     </script>
   </body>
 </html>
