@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="google-signin-client_id"
+      content="1088162041091-gka8thv8of6q703evrgvbv6vjul2ld7j.apps.googleusercontent.com"
+    />
+    <script src="https://accounts.google.com/gsi/client" async></script>
+    <title>Image gallery</title>
+  </head>
+  <body>
+    <div id="signin-button"></div>
+    <button id="signout-button" onclick="handleSignOut()">Signout</button>
+    <script>
+      window.onload = async function () {
+        console.log(google);
+        google.accounts.id.initialize({
+          client_id:
+            "1088162041091-gka8thv8of6q703evrgvbv6vjul2ld7j.apps.googleusercontent.com",
+          callback: handleCredentialResponse,
+        });
+        google.accounts.id.prompt();
+        google.accounts.id.renderButton(
+          document.getElementById("signin-button"),
+          { text: "signin" }
+        );
+      };
+
+      const handleCredentialResponse = ({ credential }) => {
+        fetch("/api/user/login", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ credential }),
+        }).then((res) => {
+          window.location.href = "/images";
+        });
+      };
+
+      
+    </script>
+  </body>
+</html>

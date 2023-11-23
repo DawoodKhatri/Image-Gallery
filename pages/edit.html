@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="/global.css" />
+    <link rel="stylesheet" href="/edit.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"
+    />
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.css"
+      rel="stylesheet"
+    />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.js"></script>
+    <title>Image Gallery | Edit</title>
+  </head>
+  <body>
+    <nav class="nav">
+      <div class="nav-branding">Image Gallery</div>
+      <div class="nav-controls">
+        <img id="picture" />
+        <!-- <p id="name"></p> -->
+        <button onclick="logout()">Logout</button>
+      </div>
+    </nav>
+    <div>
+      <div
+        class="chooser-container"
+        ondragenter="preventDefault(event);"
+        ondragover="preventDefault(event);"
+        ondrop="preventDefault(event);newImageSetup(event.dataTransfer.files);"
+      >
+        <h1>Drag & Drop Image Here</h1>
+        <p>Select the image you want to upload</p>
+        <input
+          id="new-image-picker"
+          type="file"
+          multiple="false"
+          onchange="newImageSetup(event.target.files)"
+        />
+        <button onclick="document.getElementById('new-image-picker').click()">
+          <i class="fa fa-plus"></i> Choose Image
+        </button>
+      </div>
+      <div class="cropper-container">
+        <img id="image" />
+      </div>
+      <div class="cropper-controls">
+        <input
+          id="image-picker"
+          type="file"
+          multiple="false"
+          onchange="changeImage(event)"
+        />
+        <button onclick="document.getElementById('image-picker').click()">
+          <i class="fa fa-exchange"></i> Change Image
+        </button>
+        <button onclick="rotateImage('left')">
+          <i class="fa fa-rotate-left"></i> Rotate Left
+        </button>
+        <button onclick="rotateImage('right')">
+          <i class="fa fa-rotate-right"></i>
+          Rotate Right
+        </button>
+        <button onclick="resetImage()">
+          <i class="fa fa-refresh"></i> Reset
+        </button>
+        <button onclick="cropImage()"><i class="fa fa-crop"></i> Crop</button>
+      </div>
+      <div class="display-container">
+        <img id="display" />
+        <div class="display-controls">
+          <button onclick="switchToMode('edit')">
+            <i class="fa fa-arrow-left"></i> Back to Editing
+          </button>
+          <button onclick="saveImage()">
+            <i class="fa fa-check"></i>
+            Save Image
+          </button>
+        </div>
+      </div>
+    </div>
+    <script>
+      let imageId,
+        originalImage = { name: null, url: null },
+        currImageName,
+        cropper,
+        croppedImageBlob;
+
+      window.onload = async function () {
+        let res = await fetch("/api/user");
+        const { success, message, user } = await res.json();
+
+        if (success) {
+          // document.getElementById("name").innerText = user.name;
+          document.getElementById("picture").src = user.picture;
+        }
+
+        imageId = window.location.pathname.split("/").slice(-1)[0];
+
+        if (imageId !== "new") {
+          await fetchImageDetails();
+        } else {
+          switchToMode("new");
+        }
+      };
+
+      const logout = async () => {
+        const res = await fetch("/api/user/logout", { method: "POST" });
+        window.location.href = "/";
+      };
+
+      const preventDefault = (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+      };
+
+      const fetchImageDetails = async () => {
+        const res = await fetch(`/api/images/${imageId}`);
+
+        const { success, image = {} } = await res.json();
+
+        if (success) {
+          originalImage["url"] = `/api/images/download/${image.path}`;
+          originalImage["name"] = image.name;
+          currImageName = originalImage.name;
+
+          document.getElementById("image").src = originalImage.url;
+
+          cropper = new Cropper(document.getElementById("image"), {
+            viewMode: 1,
+            background: false,
+          });
+
+          switchToMode("edit");
+        } else {
+          switchToMode("new");
+        }
+      };
+
+      const newImageSetup = (files) => {
+        const image = files[0];
+        originalImage["name"] = image.name;
+        currImageName = originalImage.name;
+        const imageReader = new FileReader();
+        imageReader.onload = ({ target: { result: dataUrl } }) => {
+          originalImage["url"] = dataUrl;
+
+          document.getElementById("image").src = originalImage.url;
+
+          cropper = new Cropper(document.getElementById("image"), {
+            viewMode: 1,
+            background: false,
+          });
+
+          switchToMode("edit");
+        };
+        imageReader.readAsDataURL(image);
+      };
+
+      const changeImage = ({ target: { files } }) => {
+        const image = files[0];
+        currImageName = image.name;
+        const imageReader = new FileReader();
+        imageReader.onload = ({ target: { result } }) => {
+          cropper.replace(result);
+          switchToMode("edit");
+        };
+        imageReader.readAsDataURL(image);
+      };
+
+      const rotateImage = (direction) => {
+        cropper.clear();
+        cropper.rotate(direction === "right" ? 90 : -90);
+        cropper.crop();
+      };
+
+      const resetImage = () => {
+        currImageName = originalImage.name;
+        cropper.replace(originalImage.url);
+      };
+
+      const cropImage = () => {
+        cropper
+          .getCroppedCanvas({
+            width: 480,
+            height: 480,
+            fillColor: "#ffffff",
+            imageSmoothingQuality: "high",
+          })
+          .toBlob((blob) => {
+            croppedImageBlob = blob;
+            document.getElementById("display").src =
+              URL.createObjectURL(croppedImageBlob);
+
+            switchToMode("display");
+          }, "image/webp");
+      };
+
+      const saveImage = async () => {
+        const newImage = new File(
+          [croppedImageBlob],
+          currImageName.split(".").slice(0, -1).join(".") + ".webp",
+          {
+            type: croppedImageBlob.type,
+          }
+        );
+        const formData = new FormData();
+        formData.append("file", newImage);
+
+        let res;
+
+        if (imageId === "new") {
+          res = await fetch(`/api/images`, {
+            method: "POST",
+            body: formData,
+          });
+        } else {
+          res = await fetch(`/api/images/${imageId}`, {
+            method: "PUT",
+            body: formData,
+          });
+        }
+
+        const { success, message } = await res.json();
+
+        if (success) {
+          window.location.href = "/images";
+        } else {
+          alert(message);
+        }
+      };
+
+      const switchToMode = (mode) => {
+        switch (mode) {
+          case "new":
+            {
+              document.getElementsByClassName(
+                "cropper-container"
+              )[0].style.display = "none";
+
+              document.getElementsByClassName(
+                "cropper-controls"
+              )[0].style.display = "none";
+
+              document.getElementsByClassName(
+                "display-container"
+              )[0].style.display = "none";
+
+              document.getElementsByClassName(
+                "chooser-container"
+              )[0].style.display = "flex";
+            }
+            break;
+
+          case "edit":
+            {
+              document.getElementsByClassName(
+                "chooser-container"
+              )[0].style.display = "none";
+
+              document.getElementsByClassName(
+                "display-container"
+              )[0].style.display = "none";
+
+              document.getElementsByClassName(
+                "cropper-container"
+              )[0].style.display = "block";
+
+              document.getElementsByClassName(
+                "cropper-controls"
+              )[0].style.display = "flex";
+            }
+            break;
+
+          case "display":
+            {
+              document.getElementsByClassName(
+                "chooser-container"
+              )[0].style.display = "none";
+
+              document.getElementsByClassName(
+                "cropper-container"
+              )[0].style.display = "none";
+
+              document.getElementsByClassName(
+                "cropper-controls"
+              )[0].style.display = "none";
+
+              document.getElementsByClassName(
+                "display-container"
+              )[0].style.display = "flex";
+            }
+            break;
+
+          default:
+            break;
+        }
+      };
+    </script>
+  </body>
+</html>

@@ -1,0 +1,139 @@
+.images-controls {
+  margin: 20px;
+  display: flex;
+  justify-content: end;
+  align-items: center;
+}
+
+.images-controls a {
+  text-decoration: none;
+}
+
+.images-container {
+  margin: 40px 20px;
+  width: calc(100% - 40px);
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.image-card-container {
+  padding: 10px;
+  flex-basis: calc(50% - 20px);
+  /* max-width: calc(50% - 20px); */
+  overflow: hidden;
+  transition: all 350ms ease-in-out;
+}
+
+.image-card-container a {
+  text-decoration: none;
+  color: black;
+}
+
+.image-card {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  aspect-ratio: 0.8;
+  border-radius: 16px;
+  background-color: var(--color-primary-bg);
+  transition: all 350ms ease-in-out;
+}
+
+.image-card img {
+  flex: 8;
+  border-radius: 16px;
+  width: 100%;
+  overflow: hidden;
+  object-fit: cover;
+  transition: all 350ms ease-in-out;
+}
+
+.image-card .image-card-name {
+  flex: 1;
+  padding: 8px;
+  transition: all 350ms ease-in-out;
+}
+
+.image-card .image-card-name p {
+  margin: 0;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 1;
+  word-break: break-all;
+  text-overflow: ellipsis;
+}
+
+.image-card-controls {
+  flex: 0;
+  width: 100%;
+  overflow: hidden;
+  display: flex;
+  justify-content: space-evenly;
+  align-items: start;
+  transition: all 350ms ease-in-out;
+}
+
+.image-card-controls a,
+.image-card-controls button {
+  all: unset;
+  color: white;
+  font-size: 12px !important;
+  padding: 4px 8px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.image-card-controls a:nth-child(1) {
+  background-color: var(--color-primary);
+}
+
+.image-card-controls a:nth-child(2) {
+  background-color: var(--color-warning);
+}
+
+.image-card-controls button {
+  background-color: var(--color-danger);
+}
+
+.image-card:hover {
+  box-shadow: 0 4px 8px 0 gray;
+}
+
+.image-card:hover .image-card-controls {
+  flex: 1.8;
+}
+
+@media (min-width: 640px) {
+  .image-card-controls a,
+  .image-card-controls button {
+    font-size: 14px !important;
+  }
+
+  .image-card-container {
+    padding: 20px;
+    flex-basis: calc(33.33% - 40px);
+  }
+}
+
+@media (min-width: 768px) {
+  .image-card-container {
+    flex-basis: calc(25% - 40px);
+  }
+}
+
+@media (min-width: 1024px) {
+  .image-card-controls a,
+  .image-card-controls button {
+    padding: 6px 12px;
+    font-size: 16px !important;
+  }
+
+  .image-card-container {
+    flex-basis: calc(20% - 40px);
+  }
+}

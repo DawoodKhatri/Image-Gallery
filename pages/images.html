@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="/global.css" />
+    <link rel="stylesheet" href="/images.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"
+    />
+    <title>Image Gallery | My Images</title>
+  </head>
+  <body>
+    <nav class="nav">
+      <div class="nav-branding">Image Gallery</div>
+      <div class="nav-controls">
+        <img id="picture" />
+        <!-- <p id="name"></p> -->
+        <button onclick="logout()">Logout</button>
+      </div>
+    </nav>
+    <div class="images-controls">
+      <a href="/images/new">
+        <button><i class="fa fa-plus"></i> Add Image</button>
+      </a>
+    </div>
+    <div id="images" class="images-container"></div>
+    <script>
+      window.onload = async function () {
+        let res = await fetch("/api/user");
+        const { success, message, user } = await res.json();
+
+        if (success) {
+          // document.getElementById("name").innerText = user.name;
+          document.getElementById("picture").src = user.picture;
+        }
+
+        await fetchImages();
+      };
+
+      const logout = () => {
+        fetch("/api/user/logout", { method: "POST" }).then((res) => {
+          window.location.href = "/";
+        });
+      };
+
+      const createNode = (tag, attributes) => {
+        const node = document.createElement(tag);
+        if (attributes) {
+          Object.keys(attributes).forEach((key) => {
+            if (key === "children") {
+              attributes[key].forEach((child) => node.appendChild(child));
+            } else {
+              node[key] = attributes[key];
+            }
+          });
+        }
+        return node;
+      };
+
+      const fetchImages = async () => {
+        const res = await fetch("/api/images");
+        const { success, images = [] } = await res.json();
+
+        if (success) {
+          document.getElementById("images").innerHTML = "";
+
+          images.forEach(({ _id, path, name }) => {
+            const downloadControlNode = createNode("a", {
+              href: `/api/images/download/${path}`,
+              children: [createNode("i", { className: "fa fa-download" })],
+            });
+
+            const deleteControlNode = createNode("button", {
+              onclick: (event) => {
+                event.preventDefault();
+                event.stopPropagation();
+                deleteImage(_id);
+              },
+              children: [createNode("i", { className: "fa fa-trash" })],
+            });
+
+            const controlsNode = createNode("div", {
+              className: "image-card-controls",
+              children: [downloadControlNode, deleteControlNode],
+            });
+
+            const imageNode = createNode("img", {
+              src: `http://localhost:3000/api/images/download/${path}`,
+            });
+
+            const nameNode = createNode("div", {
+              className: "image-card-name",
+              children: [createNode("p", { title: name, innerText: name })],
+            });
+
+            const cardNode = createNode("div", {
+              className: "image-card",
+              children: [imageNode, nameNode, controlsNode],
+            });
+
+            const rootNode = createNode("div", {
+              className: "image-card-container",
+              children: [
+                createNode("a", {
+                  href: `/images/${_id}`,
+                  children: [cardNode],
+                }),
+              ],
+            });
+
+            document.getElementById("images").appendChild(rootNode);
+          });
+        }
+      };
+
+      const deleteImage = async (imageId) => {
+        const res = await fetch(`/api/images/${imageId}`, { method: "DELETE" });
+        const { success, message } = await res.json();
+        if (!success) alert(message);
+        await fetchImages();
+      };
+    </script>
+  </body>
+</html>
