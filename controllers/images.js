@@ -1,6 +1,6 @@
 import User from "../models/user.js";
 import Image from "../models/image.js";
-// import { deleteFile, getFileStream, upload } from "../utils/storage.js";
+import { deleteFile, getFileStream, upload } from "../utils/storage.js";
 import fs from "fs";
 import { fileURLToPath } from "url";
 import { dirname } from "path";
@@ -90,8 +90,12 @@ export const streamImage = async (req, res) => {
 
     const { name, path } = image;
 
-    // const fileStream = getFileStream("Images/" + path);
-    const fileStream = fs.createReadStream(`${__dirname}/images/${path}`);
+    let fileStream;
+    if (process.env.NODE_ENV === "development") {
+      fileStream = fs.createReadStream(`${__dirname}/images/${path}`);
+    } else {
+      fileStream = getFileStream("Images/" + path);
+    }
 
     return fileStream.pipe(
       res
@@ -131,9 +135,14 @@ export const addImage = async (req, res) => {
     const uniqueFileName =
       image._id + Date.now() + "." + name.split(".").slice(-1)[0];
 
-    // await upload("Images", uniqueFileName, req.file.buffer, mimeType);
-
-    fs.writeFileSync(`${__dirname}/images/${uniqueFileName}`, req.file.buffer);
+    if (process.env.NODE_ENV === "development") {
+      fs.writeFileSync(
+        `${__dirname}/images/${uniqueFileName}`,
+        req.file.buffer
+      );
+    } else {
+      await upload("Images", uniqueFileName, req.file.buffer, mimeType);
+    }
 
     image.path = uniqueFileName;
     user.images.push(image._id);
@@ -177,16 +186,23 @@ export const updateImage = async (req, res) => {
         .status(404)
         .json({ success: false, message: "Image not Found" });
 
-    // await deleteFile(
-    //   image.path.includes("Images/") ? image.path : "Images/" + image.path
-    // );
-    fs.rmSync(`${__dirname}/images/${image.path}`);
-
     const uniqueFileName =
       image._id + Date.now() + "." + name.split(".").slice(-1)[0];
-    // await upload("Images", uniqueFileName, req.file.buffer, mimeType);
 
-    fs.writeFileSync(`${__dirname}/images/${uniqueFileName}`, req.file.buffer);
+    if (process.env.NODE_ENV === "development") {
+      fs.rmSync(`${__dirname}/images/${image.path}`);
+
+      fs.writeFileSync(
+        `${__dirname}/images/${uniqueFileName}`,
+        req.file.buffer
+      );
+    } else {
+      await deleteFile(
+        image.path.includes("Images/") ? image.path : "Images/" + image.path
+      );
+
+      await upload("Images", uniqueFileName, req.file.buffer, mimeType);
+    }
 
     image.path = uniqueFileName;
     image.name = name;
@@ -225,11 +241,14 @@ export const deleteImage = async (req, res) => {
         .status(404)
         .json({ success: false, message: "Image not Found" });
 
-    // await deleteFile(
-    //   image.path.includes("Images/") ? image.path : "Images/" + image.path
-    // );
+    if (process.env.NODE_ENV === "development") {
+      fs.rmSync(`${__dirname}/images/${image.path}`);
+    } else {
+      await deleteFile(
+        image.path.includes("Images/") ? image.path : "Images/" + image.path
+      );
+    }
 
-    fs.rmSync(`${__dirname}/images/${image.path}`);
     user.images.splice(user.images.indexOf(imageId), 1);
     await user.save();
 

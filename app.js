@@ -11,8 +11,8 @@ app.use(Express.json());
 app.use(Express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(cors());
-app.use(Express.static("styles"))
 
+app.use("/styles", Express.static("styles"));
 app.use("/", pageRoutes);
 app.use("/api/user", userRoutes);
 app.use("/api/images", imagesRoutes);
